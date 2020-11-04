@@ -2,6 +2,8 @@ import neo4j, { Driver, Session } from "neo4j-driver";
 import { v4 as uuid } from "uuid";
 import { IKickDBWrapper, Entity, Relation } from "../Dal/types";
 import { JsonToStringWithoutQuotes } from "../utils";
+import Integer from "neo4j-driver/lib/integer.js";
+import { mapValues } from "lodash";
 
 export default class Neo4j implements IKickDBWrapper {
   private _driver: Driver;
@@ -38,6 +40,14 @@ export default class Neo4j implements IKickDBWrapper {
     return `a${id.replace(/-/g, "")}`;
   }
 
+  private neo4jIntegerToNumber(properties: Object) {
+    return mapValues(properties, (propVal) => {
+      if (propVal instanceof Integer)
+        return propVal.inSafeRange() ? propVal.toNumber() : propVal.toString();
+      return propVal;
+    });
+  }
+
   async createEntity(itemToCreate: Entity): Promise<boolean> {
     let queryString = "";
 
@@ -65,7 +75,7 @@ export default class Neo4j implements IKickDBWrapper {
         );
       if (relation.RelEntityPointingOnMe)
         queryString = queryString.concat(
-          `CREATE ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
+          `MERGE ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
             uuid()
           )}:${relation.RelType}]->(entity))`
         );
@@ -74,7 +84,9 @@ export default class Neo4j implements IKickDBWrapper {
     try {
       let result = await this._session.run(queryString);
       //   result.records
-      return Promise.resolve(result.summary.counters["_stats"].nodesCreated != 0);
+      return Promise.resolve(
+        result.summary.counters["_stats"].nodesCreated != 0
+      );
     } catch (err) {
       return Promise.reject(err);
     }
@@ -102,9 +114,25 @@ export default class Neo4j implements IKickDBWrapper {
     queryString = queryString.concat(
       `MATCH (entity {id:"${id}"}) return entity`
     );
+
     try {
       let results = await this._session.run(queryString);
-      return Promise.resolve(results.records[0].get("entity"));
+      const entityDetails = results.records[0].get("entity");
+      const entityId = entityDetails.properties.id;
+      delete entityDetails.properties.id;
+
+      entityDetails.properties = this.neo4jIntegerToNumber(
+        entityDetails.properties
+      );
+
+      return Promise.resolve(
+        new Entity(
+          entityId,
+          entityDetails.labels[0],
+          entityDetails.properties,
+          []
+        )
+      );
     } catch (err) {
       return Promise.reject(err);
     }
