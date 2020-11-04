@@ -51,7 +51,7 @@ export default class Neo4j implements IKickDBWrapper {
 
     itemToCreate.Properties["id"] = itemToCreate.Id;
     queryString = queryString.concat(
-      `Create (entity:${itemToCreate.EntityType} ${JsonToStringWithoutQuotes(
+      `CREATE (entity:${itemToCreate.EntityType} ${JsonToStringWithoutQuotes(
         itemToCreate.Properties
       )})`
     );
@@ -59,13 +59,13 @@ export default class Neo4j implements IKickDBWrapper {
     itemToCreate.Relations.map((relation) => {
       if (relation.PointingOnRelEntity)
         queryString = queryString.concat(
-          `Create ((entity)-[${this.idToNeo4jId(uuid())}:${
+          `CREATE ((entity)-[${this.idToNeo4jId(uuid())}:${
             relation.RelType
           }]->(${this.idToNeo4jId(relation.Id)}))`
         );
       if (relation.RelEntityPointingOnMe)
         queryString = queryString.concat(
-          `Create ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
+          `CREATE ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
             uuid()
           )}:${relation.RelType}]->(entity))`
         );
