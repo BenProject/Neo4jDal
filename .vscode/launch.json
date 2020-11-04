@@ -6,7 +6,7 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
-      "args": ["./app.ts", "--transpile-only"],
+      "args": ["./src/app.ts", "--transpile-only"],
       "cwd": "${workspaceFolder}",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**", "node_modules/**"],
