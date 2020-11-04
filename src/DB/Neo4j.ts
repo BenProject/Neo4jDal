@@ -43,7 +43,9 @@ export default class Neo4j implements IKickDBWrapper {
 
     itemToCreate.Relations.map((relation) => {
       queryString = queryString.concat(
-        ` MATCH(${this.idToNeo4jId(relation.Id)} {id:"${relation.RelEntityId}"})`
+        ` MATCH(${this.idToNeo4jId(relation.Id)} {id:"${
+          relation.RelEntityId
+        }"})`
       );
     });
 
@@ -55,23 +57,26 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     itemToCreate.Relations.map((relation) => {
-     if (relation.PointingOnRelEntity)
-      queryString = queryString.concat(
-        `Create ((entity)-[${this.idToNeo4jId(uuid())}:${relation.RelType}]->(${this.idToNeo4jId(relation.Id)}))`
-      );
-      if(relation.RelEntityPointingOnMe)
-      queryString = queryString.concat(
-        `Create ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(uuid())}:${relation.RelType}]->(entity))`
-      );
-
+      if (relation.PointingOnRelEntity)
+        queryString = queryString.concat(
+          `Create ((entity)-[${this.idToNeo4jId(uuid())}:${
+            relation.RelType
+          }]->(${this.idToNeo4jId(relation.Id)}))`
+        );
+      if (relation.RelEntityPointingOnMe)
+        queryString = queryString.concat(
+          `Create ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
+            uuid()
+          )}:${relation.RelType}]->(entity))`
+        );
     });
 
     try {
       await this._session.run(queryString);
-      return true;
+      return Promise.resolve(true);
     } catch (err) {
       console.log("error whiile creating entity, ", err);
-      return false;
+      return Promise.reject(err);
     }
   }
 

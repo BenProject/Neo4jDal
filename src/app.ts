@@ -22,5 +22,5 @@ dbWrapper
       ),
     ])
   )
-  .then((res) => console.log(res))
+  .then((res) => console.log("isSucceedd ", res))
   .catch((err) => console.log(err));
