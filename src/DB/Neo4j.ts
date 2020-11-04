@@ -72,10 +72,10 @@ export default class Neo4j implements IKickDBWrapper {
     });
 
     try {
-      await this._session.run(queryString);
-      return Promise.resolve(true);
+      let result = await this._session.run(queryString);
+      //   result.records
+      return Promise.resolve(result.summary.counters["_stats"].nodesCreated != 0);
     } catch (err) {
-      console.log("error whiile creating entity, ", err);
       return Promise.reject(err);
     }
   }
@@ -86,18 +86,28 @@ export default class Neo4j implements IKickDBWrapper {
 
   async deleteById(id: string): Promise<boolean> {
     let queryString = "";
-    queryString = queryString.concat(`MATCH (entity {id:"${id}"}) detach DELETE entity`);
+    queryString = queryString.concat(
+      `MATCH (entity {id:"${id}"}) detach DELETE entity`
+    );
     try {
       await this._session.run(queryString);
       return Promise.resolve(true);
     } catch (err) {
-      console.log("error while deleting entity, ", err);
       return Promise.reject(err);
     }
   }
 
-  getEntityById(id: string): Promise<Entity> {
-    throw new Error("Method not implemented.");
+  async getEntityById(id: string): Promise<Entity> {
+    let queryString = "";
+    queryString = queryString.concat(
+      `MATCH (entity {id:"${id}"}) return entity`
+    );
+    try {
+      let results = await this._session.run(queryString);
+      return Promise.resolve(results.records[0].get("entity"));
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
   getEntitiesByParams(params: Object): Promise<Entity[]> {
     throw new Error("Method not implemented.");
