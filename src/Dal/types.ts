@@ -17,26 +17,26 @@ interface IKickDBWrapper {
 }
 
 class OneWayRelation {
-  public toId: string;
-  public type: string;
+  public ToId: string;
+  public Type: string;
   constructor(toId: string, type: string) {
-    this.toId = toId;
-    this.type = type;
+    this.ToId = toId;
+    this.Type = type;
   }
 }
 
 class TwoWaysRelation extends OneWayRelation {
-  public fromId: string;
+  public FromId: string;
 
   constructor(fromId: string, toId: string, type: string) {
     super(toId, type);
-    this.fromId = fromId;
+    this.FromId = fromId;
   }
 }
 
 class Entity {
-  id: string;
-  type: string;
-  properties: Object;
-  Relations: Array<TwoWaysRelation>;
+  public Id: string;
+  public Type: string;
+  public Properties: Object;
+  public Relations: Array<TwoWaysRelation>;
 }
