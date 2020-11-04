@@ -22,17 +22,20 @@ export class Relation {
   public RelEntityId: string;
   public RelType: string;
   public PointingOnRelEntity: boolean;
+  public RelEntityPointingOnMe: boolean;
   private _id: string;
 
   constructor(
     relEntityId: string,
     relType: string,
     pointingOnRelEntity: boolean,
+    relEntityPointingOnMe: boolean,
     id: string
   ) {
     this.RelEntityId = relEntityId;
     this.RelType = relType;
     this.PointingOnRelEntity = pointingOnRelEntity;
+    this.RelEntityPointingOnMe = relEntityPointingOnMe;
     this._id = id;
   }
 

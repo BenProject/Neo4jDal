@@ -55,9 +55,15 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     itemToCreate.Relations.map((relation) => {
+     if (relation.PointingOnRelEntity)
       queryString = queryString.concat(
         `Create ((entity)-[${this.idToNeo4jId(uuid())}:${relation.RelType}]->(${this.idToNeo4jId(relation.Id)}))`
       );
+      if(relation.RelEntityPointingOnMe)
+      queryString = queryString.concat(
+        `Create ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(uuid())}:${relation.RelType}]->(entity))`
+      );
+
     });
 
     try {
