@@ -83,9 +83,19 @@ export default class Neo4j implements IKickDBWrapper {
   updateEntityById(id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
-  deleteById(id: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+
+  async deleteById(id: string): Promise<boolean> {
+    let queryString = "";
+    queryString = queryString.concat(`MATCH (entity {id:"${id}"}) detach DELETE entity`);
+    try {
+      await this._session.run(queryString);
+      return Promise.resolve(true);
+    } catch (err) {
+      console.log("error while deleting entity, ", err);
+      return Promise.reject(err);
+    }
   }
+
   getEntityById(id: string): Promise<Entity> {
     throw new Error("Method not implemented.");
   }
