@@ -1,11 +1,6 @@
 import neo4j, { Driver, Session, Record } from "neo4j-driver";
 import { v4 as uuid } from "uuid";
-import {
-  IKickDBWrapper,
-  Entity,
-  Relation,
-  EntityRelationsPair,
-} from "../Dal/types";
+import { IKickDBWrapper } from "../Dal/interfaces";
 import { JsonToStringWithoutQuotes } from "../utils";
 import Integer from "neo4j-driver/lib/integer.js";
 import { mapValues } from "lodash";
@@ -239,7 +234,7 @@ export default class Neo4j implements IKickDBWrapper {
       return Promise.reject(err);
     }
   }
-  
+
   editEntitytRelationsById(
     id: string,
     relations: Relation[]
