@@ -23,9 +23,7 @@ export default class Neo4j implements IKickDBWrapper {
     this._password = password;
     this.init();
   }
-  createEntity(itemToCreate: Entity): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
+
   getEntityById(id: string): Promise<Entity> {
     throw new Error("Method not implemented.");
   }
@@ -47,8 +45,8 @@ export default class Neo4j implements IKickDBWrapper {
   }
 
   // neo4j id can not start with number and cannot have dashes
-  private idToNeo4jId(id: string) {
-    return `a${id.replace(/-/g, "")}`;
+  private generateTempNeo4jId() {
+    return `a${uuid().replace(/-/g, "")}`;
   }
 
   private neo4jIntegerToNumber(properties: Object) {
@@ -59,52 +57,60 @@ export default class Neo4j implements IKickDBWrapper {
     });
   }
 
-  //   async createEntity(itemToCreate: Entity): Promise<boolean> {
-  //     let queryString = "";
-  // idToRelation
+  async createEntity(
+    entityRelationsPair: EntityRelationsPair
+  ): Promise<boolean> {
+    let queryString = "";
+    let relations = entityRelationsPair.Relations;
+    let entity = entityRelationsPair.Entity;
 
-  //   itemToCreate.Relations.map(relation=>{
-  // })
-  //     itemToCreate.Relations.map((relation) => {
-  //       queryString = queryString.concat(
-  //         ` MATCH(${this.idToNeo4jId(relation.Id)} {id:"${
-  //           relation.RelEntityId
-  //         }"})`
-  //       );
-  //     });
+    let tempIdToRelationsMap = relations.map((relation) => {
+      return { relId: this.generateTempNeo4jId(), relDetails: relation };
+    });
 
-  //     itemToCreate.Properties["id"] = itemToCreate.Id;
-  //     queryString = queryString.concat(
-  //       `MERGE (entity:${itemToCreate.EntityType} ${JsonToStringWithoutQuotes(
-  //         itemToCreate.Properties
-  //       )})`
-  //     );
+    tempIdToRelationsMap.map((idToRelation) => {
+      queryString = queryString.concat(
+        ` MATCH(${idToRelation.relId}) where toString(id(${idToRelation.relId}))="${idToRelation.relDetails.RelEntityId}"`
+      );
+    });
 
-  //     itemToCreate.Relations.map((relation) => {
-  //       if (relation.PointingOnRelEntity)
-  //         queryString = queryString.concat(
-  //           `MERGE ((entity)-[${this.idToNeo4jId(uuid())}:${
-  //             relation.RelType
-  //           }]->(${this.idToNeo4jId(relation.Id)}))`
-  //         );
-  //       if (relation.RelEntityPointingOnMe)
-  //         queryString = queryString.concat(
-  //           `MERGE ((${this.idToNeo4jId(relation.Id)})-[${this.idToNeo4jId(
-  //             uuid()
-  //           )}:${relation.RelType}]->(entity))`
-  //         );
-  //     });
+    queryString = queryString.concat(
+      `MERGE (entity:${entity.EntityType} ${JsonToStringWithoutQuotes(
+        entity.Properties
+      )})`
+    );
 
-  //     try {
-  //       let result = await this._session.run(queryString);
-  //       //   result.records
-  //       return Promise.resolve(
-  //         result.summary.counters["_stats"].nodesCreated != 0
-  //       );
-  //     } catch (err) {
-  //       return Promise.reject(err);
-  //     }
-  //   }
+    tempIdToRelationsMap.map((idToRelation) => {
+      if (
+        idToRelation.relDetails.EndEntityId ===
+        idToRelation.relDetails.RelEntityId
+      )
+        queryString = queryString.concat(
+          `MERGE ((entity)-[${this.generateTempNeo4jId()}:${
+            idToRelation.relDetails.RelType
+          }]->(${idToRelation.relId}))`
+        );
+      if (
+        idToRelation.relDetails.StartEntityId ===
+        idToRelation.relDetails.RelEntityId
+      )
+        queryString = queryString.concat(
+          `MERGE ((${idToRelation.relId})-[${this.generateTempNeo4jId()}:${
+            idToRelation.relDetails.RelType
+          }]->(entity))`
+        );
+    });
+
+    try {
+      let result = await this._session.run(queryString);
+      //   result.records
+      return Promise.resolve(
+        result.summary.counters["_stats"].nodesCreated != 0
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
 
   updateEntityById(id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
@@ -113,7 +119,7 @@ export default class Neo4j implements IKickDBWrapper {
   async deleteById(id: string): Promise<boolean> {
     let queryString = "";
     queryString = queryString.concat(
-      `MATCH (entity {id:"${id}"}) detach DELETE entity`
+      `MATCH (entity) where toString(id(entity))="${id}" DETACH DELETE entity`
     );
     try {
       await this._session.run(queryString);

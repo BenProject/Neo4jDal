@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 
 export interface IKickDBWrapper {
-  createEntity(itemToCreate: Entity): Promise<boolean>;
+  createEntity(entityRelationsPair: EntityRelationsPair): Promise<boolean>;
   updateEntityById(id: string): Promise<boolean>;
   deleteById(id: string): Promise<boolean>;
   getEntityById(id: string): Promise<Entity> | null;
@@ -29,35 +29,45 @@ class Pair<TKey, TValue> {
 }
 
 export class EntityRelationsPair {
-  public Pair: Pair<Entity, Relation[] | null>;
+  private _pair: Pair<Entity, Relation[] | null>;
   constructor(entity: Entity, relations: Relation[]) {
-    this.Pair = new Pair<Entity, Relation[]>(entity, relations);
+    this._pair = new Pair<Entity, Relation[]>(entity, relations);
+  }
+  get Relations() {
+    return this._pair.Value;
+  }
+
+  get Entity() {
+    return this._pair.Key;
   }
 }
 
 export class Relation {
   public RelType: string;
   public RelEntityId: string;
-  public Start: string | null;
-  public End: string | null;
+  public StartEntityId: string | null;
+  public EndEntityId: string | null;
 
   constructor(relType: string, relEntityId: string, start = null, end = null) {
     this.RelType = relType;
     this.RelEntityId = relEntityId;
-    this.Start = start;
-    this.End = end;
+    this.StartEntityId = start;
+    this.EndEntityId = end;
   }
 }
 
 export class Entity {
-  private _id: string | null;
   public EntityType: string;
   public Properties: Object;
-
-  constructor(entityType: string, properties: Object, id: string = null) {
-    this._id = id;
+  private _id: string;
+  constructor(
+    entityType: string,
+    properties: Object,
+    id: string | null = null
+  ) {
     this.EntityType = entityType;
     this.Properties = properties;
+    this._id = id;
   }
 
   get Id() {
