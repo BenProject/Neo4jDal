@@ -115,7 +115,7 @@ export default class Neo4j implements IKickDBWrapper {
   async deleteById(id: string): Promise<boolean> {
     let queryString = "";
     queryString = queryString.concat(
-      `MATCH (entity) where toString(id(entity))="${id}" DETACH DELETE entity`
+      `MATCH (entity) WHERE toString(id(entity))="${id}" DETACH DELETE entity`
     );
     try {
       await this._session.run(queryString);
@@ -128,7 +128,7 @@ export default class Neo4j implements IKickDBWrapper {
   async getEntityById(id: string): Promise<Entity> {
     let queryString = "";
     queryString = queryString.concat(
-      `MATCH (entity) where toString(id(entity))="${id}" return entity`
+      `MATCH (entity) WHERE toString(id(entity))="${id}" RETURN entity`
     );
 
     try {
@@ -140,8 +140,19 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  getEntitiesByParams(params: Object): Promise<Entity[]> {
-    throw new Error("Method not implemented.");
+  async getEntitiesByParams(params: Object): Promise<Entity[]> {
+    let queryString = "";
+    queryString = queryString.concat(
+      `match(entities ${JsonToStringWithoutQuotes(params)}) return entities`
+    );
+    try {
+      let results = await this._session.run(queryString);
+      return Promise.resolve(
+        results.records.map((record) => this.RecordToEntity(record, "entities"))
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   private RecordToEntity(neo4jRecord: Record, entityKey: string): Entity {
@@ -199,7 +210,9 @@ export default class Neo4j implements IKickDBWrapper {
     let queryString = "";
     let relatedEntites = new Array<EntityRelationsPair>();
 
-    queryString = queryString.concat(`MATCH (entity {id:"${id}"})`);
+    queryString = queryString.concat(
+      `MATCH (entity) WHERE toString(id(entity))="${id}"`
+    );
 
     queryString = queryString.concat(
       `MATCH (entity)-[${
@@ -215,7 +228,7 @@ export default class Neo4j implements IKickDBWrapper {
         )
       );
 
-      Promise.resolve(relatedEntites);
+      return Promise.resolve(relatedEntites);
     } catch (err) {
       return Promise.reject(err);
     }
