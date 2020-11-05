@@ -9,8 +9,9 @@ export interface IKickDBWrapper {
 
   getEntityRelationsById(
     id: string,
-    hopsNumber: number
-  ): Promise<Array<Relation>>;
+    hopsNumber: number,
+    relationType: "string" | null
+  ): Promise<Array<EntityRelationsPair>>;
 
   editEntitytRelationsById(
     id: string,
@@ -18,48 +19,62 @@ export interface IKickDBWrapper {
   ): Promise<boolean>;
 }
 
-export class Relation {
-  public RelEntityId: string;
-  public RelType: string;
-  public PointingOnRelEntity: boolean;
-  public RelEntityPointingOnMe: boolean;
-  private _id: string;
-
-  constructor(
-    relEntityId: string,
-    relType: string,
-    pointingOnRelEntity: boolean,
-    relEntityPointingOnMe: boolean,
-    id: string
-  ) {
-    this.RelEntityId = relEntityId;
-    this.RelType = relType;
-    this.PointingOnRelEntity = pointingOnRelEntity;
-    this.RelEntityPointingOnMe = relEntityPointingOnMe;
-    this._id = id;
+class Pair<TKey, TValue> {
+  public Key: TKey;
+  public Value: TValue;
+  constructor(key: TKey, value: TValue) {
+    this.Key = key;
+    this.Value = value;
   }
+}
 
-  get Id() {
-    return this._id;
+export class EntityRelationsPair {
+  public Pair: Pair<Entity, Relation[] | null>;
+  constructor(entity: Entity, relations: Relation[]) {
+    this.Pair = new Pair<Entity, Relation[]>(entity, relations);
+  }
+}
+
+// export class Relation {
+//   public RelEntityId: string;
+//   public RelType: string;
+//   public PointingOnRelEntity: boolean;
+//   public RelEntityPointingOnMe: boolean;
+
+//   constructor(
+//     relEntityId: string,
+//     relType: string,
+//     pointingOnRelEntity: boolean,
+//     relEntityPointingOnMe: boolean
+//   ) {
+//     this.RelEntityId = relEntityId;
+//     this.RelType = relType;
+//     this.PointingOnRelEntity = pointingOnRelEntity;
+//     this.RelEntityPointingOnMe = relEntityPointingOnMe;
+//   }
+// }
+
+export class Relation {
+  public RelType: string;
+  public Start: string;
+  public End: string | null;
+
+  constructor(relType, start, end = null) {
+    this.RelType = relType;
+    this.Start = start;
+    this.End = end;
   }
 }
 
 export class Entity {
-  private _id: string;
+  private _id: string | null;
   public EntityType: string;
   public Properties: Object;
-  public Relations: Array<Relation>;
 
-  constructor(
-    id: string,
-    entityType: string,
-    properties: Object,
-    realtions: Array<Relation>
-  ) {
+  constructor(entityType: string, properties: Object, id: string = null) {
     this._id = id;
     this.EntityType = entityType;
     this.Properties = properties;
-    this.Relations = realtions;
   }
 
   get Id() {
