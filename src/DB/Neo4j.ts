@@ -53,6 +53,40 @@ export default class Neo4j implements IKickDBWrapper {
     });
   }
 
+  private RecordToEntity(neo4jRecord: Record, entityKey: string): Entity {
+    const recordDetails = neo4jRecord.get(entityKey);
+    let entityProperties = recordDetails.properties;
+
+    const entityId = recordDetails.identity;
+
+    entityProperties = this.neo4jIntegerToNumber(entityProperties);
+    return new Entity(
+      recordDetails.labels[0],
+      entityProperties,
+      entityId.toString()
+    );
+  }
+
+  private RecordToRelations(
+    neo4jRecord: Record,
+    relKey: string,
+    entityId
+  ): Relation[] {
+    const neo4jRelations = neo4jRecord.get(relKey);
+
+    if (neo4jRelations instanceof Array && neo4jRelations.length === 0) {
+      return [];
+    }
+    return neo4jRelations.map((relation) => {
+      return new Relation(
+        relation.type,
+        entityId.toString(),
+        relation.start.toString(),
+        relation.end.toString()
+      );
+    });
+  }
+
   async createEntity(
     entityRelationsPair: EntityRelationsPair
   ): Promise<boolean> {
@@ -155,49 +189,17 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  private RecordToEntity(neo4jRecord: Record, entityKey: string): Entity {
-    const recordDetails = neo4jRecord.get(entityKey);
-    let entityProperties = recordDetails.properties;
-
-    const entityId = recordDetails.identity;
-
-    entityProperties = this.neo4jIntegerToNumber(entityProperties);
-    return new Entity(
-      recordDetails.labels[0],
-      entityProperties,
-      entityId.toString()
-    );
-  }
-
-  private RecordToRelations(
-    neo4jRecord: Record,
-    relKey: string,
-    entityId
-  ): Relation[] {
-    const neo4jRelations = neo4jRecord.get(relKey);
-
-    if (neo4jRelations instanceof Array && neo4jRelations.length === 0) {
-      return [];
-    }
-    return neo4jRelations.map((relation) => {
-      return new Relation(
-        relation.type,
-        entityId.toString(),
-        relation.start.toString(),
-        relation.end.toString()
-      );
-    });
-  }
-
   private neo4jRecordToEntityAndEntityRelationsPair(
-    neo4jRecord: Record
+    neo4jRecord: Record,
+    entityKey: string,
+    relKey: string
   ): EntityRelationsPair {
     return new EntityRelationsPair(
-      this.RecordToEntity(neo4jRecord, "neighbor"),
+      this.RecordToEntity(neo4jRecord, entityKey),
       this.RecordToRelations(
         neo4jRecord,
-        "rel",
-        neo4jRecord.get("neighbor").identity
+        relKey,
+        neo4jRecord.get(entityKey).identity
       )
     );
   }
@@ -224,7 +226,11 @@ export default class Neo4j implements IKickDBWrapper {
       let results = await this._session.run(queryString);
       results.records.map((record) =>
         relatedEntites.push(
-          this.neo4jRecordToEntityAndEntityRelationsPair(record)
+          this.neo4jRecordToEntityAndEntityRelationsPair(
+            record,
+            "neighbor",
+            "rel"
+          )
         )
       );
 
@@ -233,6 +239,7 @@ export default class Neo4j implements IKickDBWrapper {
       return Promise.reject(err);
     }
   }
+  
   editEntitytRelationsById(
     id: string,
     relations: Relation[]
