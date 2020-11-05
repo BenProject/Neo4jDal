@@ -24,10 +24,6 @@ export default class Neo4j implements IKickDBWrapper {
     this.init();
   }
 
-  getEntityById(id: string): Promise<Entity> {
-    throw new Error("Method not implemented.");
-  }
-
   private init() {
     this.createConnection();
     this.createSession();
@@ -129,34 +125,21 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  //   async getEntityById(id: string): Promise<Entity> {
-  //     let queryString = "";
-  //     queryString = queryString.concat(
-  //       `MATCH (entity {id:"${id}"}) return entity`
-  //     );
+  async getEntityById(id: string): Promise<Entity> {
+    let queryString = "";
+    queryString = queryString.concat(
+      `MATCH (entity) where toString(id(entity))="${id}" return entity`
+    );
 
-  //     try {
-  //       let results = await this._session.run(queryString);
-  //       const entityDetails = results.records[0].get("entity");
-  //       const entityId = entityDetails.properties.id;
-  //       delete entityDetails.properties.id;
+    try {
+      let results = await this._session.run(queryString);
+      const entity = this.RecordToEntity(results.records[0], "entity");
+      return Promise.resolve(entity);
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
 
-  //       entityDetails.properties = this.neo4jIntegerToNumber(
-  //         entityDetails.properties
-  //       );
-
-  //       return Promise.resolve(
-  //         new Entity(
-  //           entityId,
-  //           entityDetails.labels[0],
-  //           entityDetails.properties,
-  //           []
-  //         )
-  //       );
-  //     } catch (err) {
-  //       return Promise.reject(err);
-  //     }
-  //   }
   getEntitiesByParams(params: Object): Promise<Entity[]> {
     throw new Error("Method not implemented.");
   }

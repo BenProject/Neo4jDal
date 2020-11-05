@@ -12,12 +12,12 @@ dbWrapper
   // .then((res) => console.log("isSucceedd ", res))
   // .catch((err) => console.log(err));
 
-  .deleteById("6")
-  .then((res) => console.log(res))
+  // .deleteById("6")
+  // .then((res) => console.log(res))
+  // .catch((err) => console.log(err));
+  .getEntityById("13")
+  .then((entity) => console.log(entity))
   .catch((err) => console.log(err));
-//   .getEntityById("dff21f54-16df-4fea-8bf7-3b18edd5787d")
-//   .then((entity) => console.log(entity))
-//   .catch((err) => console.log(err));
 // .getEntityRelationsById("dff21f54-16df-4fea-8bf7-3b18edd5787d", 3, null)
 // .then((res) => console.log(res))
 // .catch((err) => console.log(err));
