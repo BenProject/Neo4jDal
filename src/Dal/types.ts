@@ -35,32 +35,15 @@ export class EntityRelationsPair {
   }
 }
 
-// export class Relation {
-//   public RelEntityId: string;
-//   public RelType: string;
-//   public PointingOnRelEntity: boolean;
-//   public RelEntityPointingOnMe: boolean;
-
-//   constructor(
-//     relEntityId: string,
-//     relType: string,
-//     pointingOnRelEntity: boolean,
-//     relEntityPointingOnMe: boolean
-//   ) {
-//     this.RelEntityId = relEntityId;
-//     this.RelType = relType;
-//     this.PointingOnRelEntity = pointingOnRelEntity;
-//     this.RelEntityPointingOnMe = relEntityPointingOnMe;
-//   }
-// }
-
 export class Relation {
   public RelType: string;
-  public Start: string;
+  public RelEntityId: string;
+  public Start: string | null;
   public End: string | null;
 
-  constructor(relType, start, end = null) {
+  constructor(relType: string, relEntityId: string, start = null, end = null) {
     this.RelType = relType;
+    this.RelEntityId = relEntityId;
     this.Start = start;
     this.End = end;
   }

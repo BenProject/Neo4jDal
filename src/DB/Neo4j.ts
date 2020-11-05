@@ -160,7 +160,6 @@ export default class Neo4j implements IKickDBWrapper {
     let entityProperties = recordDetails.properties;
 
     const entityId = recordDetails.identity;
-    // delete entityProperties.id;
 
     entityProperties = this.neo4jIntegerToNumber(entityProperties);
     return new Entity(
@@ -183,11 +182,9 @@ export default class Neo4j implements IKickDBWrapper {
     return neo4jRelations.map((relation) => {
       return new Relation(
         relation.type,
+        entityId.toString(),
         relation.start.toString(),
         relation.end.toString()
-
-        // entityId.compare(relation.start) === 0,
-        // entityId.compare(relation.end) === 0
       );
     });
   }
@@ -211,7 +208,6 @@ export default class Neo4j implements IKickDBWrapper {
     relationType: string | null
   ): Promise<Array<EntityRelationsPair>> {
     let queryString = "";
-    // let relatedEntites = []: Array<EntityRelationsPair>;
     let relatedEntites = new Array<EntityRelationsPair>();
 
     queryString = queryString.concat(`MATCH (entity {id:"${id}"})`);
@@ -219,7 +215,7 @@ export default class Neo4j implements IKickDBWrapper {
     queryString = queryString.concat(
       `MATCH (entity)-[${
         relationType ? `rel:${relationType}` : "rel "
-      }*0..${hopsNumber}]-(neighbor) RETURN neighbor, distinct(rel)`
+      }*0..${hopsNumber}]-(neighbor) RETURN neighbor, rel`
     );
 
     try {
