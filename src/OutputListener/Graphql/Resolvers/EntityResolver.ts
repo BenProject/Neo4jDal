@@ -14,8 +14,11 @@ export class entityProps {
 
 @Resolver()
 export default class EntityResolver {
-  @Query((returns) => [Entity], { nullable: true })
-  async entity(@Args() entityProperties: entityProps): Promise<Entity[]> {
+  @Query((returns) => [Entity], {
+    nullable: true,
+    description: "get all entities matching params",
+  })
+  async entities(@Args() entityProperties: entityProps): Promise<Entity[]> {
     return Promise.resolve(
       await dbWrapper.getEntitiesByParams(entityProperties.properties)
     );
