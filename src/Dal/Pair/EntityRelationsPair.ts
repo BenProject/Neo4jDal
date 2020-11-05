@@ -1,4 +1,8 @@
-export class EntityRelationsPair {
+import Entity from "../Entity";
+import Relation from "../Relation";
+import Pair from "./Pair";
+
+export default class EntityRelationsPair {
     private _pair: Pair<Entity, Relation[] | null>;
     constructor(entity: Entity, relations: Relation[]) {
       this._pair = new Pair<Entity, Relation[]>(entity, relations);

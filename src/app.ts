@@ -1,5 +1,6 @@
-import { Entity, EntityRelationsPair, Relation } from "./Dal/types";
 import Neo4j from "./DB/Neo4j";
 import { v4 as uuid } from "uuid";
+import { listener } from "./OutputListener/Graphql";
 
-let dbWrapper = new Neo4j("bolt://localhost", "neo4j", "123456");
+
+listener().then((res) => console.log("success"));

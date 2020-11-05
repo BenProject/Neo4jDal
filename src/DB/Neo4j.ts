@@ -4,6 +4,9 @@ import { IKickDBWrapper } from "../Dal/interfaces";
 import { JsonToStringWithoutQuotes } from "../utils";
 import Integer from "neo4j-driver/lib/integer.js";
 import { mapValues } from "lodash";
+import Entity from "../Dal/Entity";
+import Relation from "../Dal/Relation";
+import EntityRelationsPair from "../Dal/Pair/EntityRelationsPair";
 
 export default class Neo4j implements IKickDBWrapper {
   private _driver: Driver;
