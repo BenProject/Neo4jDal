@@ -8,7 +8,11 @@ export interface IKickDBWrapper {
   updateEntityById(id: Id): Promise<boolean>;
   deleteById(id: Id): Promise<boolean>;
   getEntityById(id: Id): Promise<Entity> | null;
-  getEntitiesByParams(params: Object): Promise<Array<Entity>> | null;
+  getEntitiesByParams(
+    params: Object,
+    pageNumber: number,
+    entitiesPerPage: number
+  ): Promise<Array<Entity>> | null;
 
   getEntityRelationsById(
     id: Id,

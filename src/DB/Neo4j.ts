@@ -173,12 +173,16 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  async getEntitiesByParams(properties: entityProperties): Promise<Entity[]> {
+  async getEntitiesByParams(
+    properties: entityProperties,
+    pageNumber: number,
+    entitiesPerPage: number
+  ): Promise<Entity[]> {
     let queryString = "";
     queryString = queryString.concat(
       `match(entities ${JsonToStringWithoutQuotes(
         properties.Params
-      )}) return entities`
+      )}) return entities ORDER BY id(entities) SKIP ${entitiesPerPage * (pageNumber-1)} LIMIT ${entitiesPerPage}`
     );
     try {
       let results = await this._session.run(queryString);

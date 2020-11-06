@@ -32,8 +32,6 @@ export default class RelationResolver {
   })
   async relations(
     @Args() entityId: Id,
-    // @Arg("hopsNumber", { nullable: false, validate: true, }) hopsNumber: number,
-    // @Arg("realationType", { nullable: true }) relationType: string | null
     @Args() { hopsNumber, relationType }: relationsArgs
   ): Promise<Array<EntityRelationsPair>> {
     return Promise.resolve(
