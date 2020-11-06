@@ -17,7 +17,7 @@ dbWrapper
 // .deleteById(new Id("13"))
 // .then(res=>console.log(res))
 // .catch(err=>console.log(err))
-.getEntityRelationsById(new Id("11"),2,null)
-.then(res=>console.log(res))
+// .getEntityRelationsById(new Id("11"),2,null)
+// .then(res=>console.log(res))
 
 listener().then((res) => console.log("success"));

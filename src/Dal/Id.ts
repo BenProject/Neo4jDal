@@ -1,5 +1,6 @@
-import { ArgsType, Field } from "type-graphql";
+import { ArgsType, Field, ObjectType } from "type-graphql";
 
+@ObjectType()
 @ArgsType()
 export default class Id {
   @Field((type) => String)
