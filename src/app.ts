@@ -14,9 +14,10 @@ dbWrapper
 //     [new Relation("randomRelation", "12", null, "12")]
 //   )
 // )
-.deleteById(new Id("13"))
+// .deleteById(new Id("13"))
+// .then(res=>console.log(res))
+// .catch(err=>console.log(err))
+.getEntityRelationsById(new Id("11"),2,null)
 .then(res=>console.log(res))
-.catch(err=>console.log(err))
-
 
 listener().then((res) => console.log("success"));

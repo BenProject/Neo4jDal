@@ -8,6 +8,7 @@ const app = express();
 export async function listener() {
   const schema = await buildSchema({
     resolvers: [EntityResolver],
+    validate: false
   });
 
   app.use(

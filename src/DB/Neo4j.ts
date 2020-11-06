@@ -4,7 +4,7 @@ import { IKickDBWrapper } from "../Dal/interfaces";
 import { JsonToStringWithoutQuotes } from "../utils";
 import Integer from "neo4j-driver/lib/integer.js";
 import { mapValues } from "lodash";
-import Entity, { entityProperties} from "../Dal/Entity";
+import Entity, { entityProperties } from "../Dal/Entity";
 import Relation from "../Dal/Relation";
 import EntityRelationsPair from "../Dal/Pair/EntityRelationsPair";
 import Id from "../Dal/Id";
@@ -69,7 +69,7 @@ export default class Neo4j implements IKickDBWrapper {
   private RecordToRelations(
     neo4jRecord: Record,
     relKey: string,
-    entityId
+    entityId: Id
   ): Relation[] {
     const neo4jRelations = neo4jRecord.get(relKey);
 
@@ -79,9 +79,9 @@ export default class Neo4j implements IKickDBWrapper {
     return neo4jRelations.map((relation) => {
       return new Relation(
         relation.type,
-        entityId.toString(),
-        relation.start.toString(),
-        relation.end.toString()
+        entityId,
+        new Id(relation.start.toString()),
+        new Id(relation.end.toString())
       );
     });
   }
@@ -141,7 +141,7 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  updateEntityById(id: string): Promise<boolean> {
+  updateEntityById(id: Id): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
 
@@ -200,13 +200,13 @@ export default class Neo4j implements IKickDBWrapper {
       this.RecordToRelations(
         neo4jRecord,
         relKey,
-        neo4jRecord.get(entityKey).identity
+        new Id(neo4jRecord.get(entityKey).identity.toString())
       )
     );
   }
 
   async getEntityRelationsById(
-    id: string,
+    id: Id,
     hopsNumber: number,
     relationType: string | null
   ): Promise<Array<EntityRelationsPair>> {
@@ -214,7 +214,7 @@ export default class Neo4j implements IKickDBWrapper {
     let relatedEntites = new Array<EntityRelationsPair>();
 
     queryString = queryString.concat(
-      `MATCH (entity) WHERE toString(id(entity))="${id}"`
+      `MATCH (entity) WHERE toString(id(entity))="${id.id}"`
     );
 
     queryString = queryString.concat(
@@ -241,10 +241,7 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  editEntitytRelationsById(
-    id: string,
-    relations: Relation[]
-  ): Promise<boolean> {
+  editEntitytRelationsById(id: Id, relations: Relation[]): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
 }
