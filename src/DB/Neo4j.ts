@@ -4,7 +4,7 @@ import { IKickDBWrapper } from "../Dal/interfaces";
 import { JsonToStringWithoutQuotes } from "../utils";
 import Integer from "neo4j-driver/lib/integer.js";
 import { mapValues } from "lodash";
-import Entity from "../Dal/Entity";
+import Entity, { entityProperties } from "../Dal/Entity";
 import Relation from "../Dal/Relation";
 import EntityRelationsPair from "../Dal/Pair/EntityRelationsPair";
 
@@ -104,7 +104,7 @@ export default class Neo4j implements IKickDBWrapper {
 
     queryString = queryString.concat(
       `MERGE (entity:${entity.EntityType} ${JsonToStringWithoutQuotes(
-        entity.Properties
+        entity.Properties.Params
       )})`
     );
 
@@ -172,10 +172,12 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  async getEntitiesByParams(params: Object): Promise<Entity[]> {
+  async getEntitiesByParams(properties: entityProperties): Promise<Entity[]> {
     let queryString = "";
     queryString = queryString.concat(
-      `match(entities ${JsonToStringWithoutQuotes(params)}) return entities`
+      `match(entities ${JsonToStringWithoutQuotes(
+        properties.Params
+      )}) return entities`
     );
     try {
       let results = await this._session.run(queryString);
