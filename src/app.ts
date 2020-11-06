@@ -19,5 +19,6 @@ dbWrapper
 // .catch(err=>console.log(err))
 // .getEntityRelationsById(new Id("11"),2,null)
 // .then(res=>console.log(res))
-
+.getNumberOfPages(new entityProperties({}),5)
+.then(res=>console.log(res))
 listener().then((res) => console.log("success"));

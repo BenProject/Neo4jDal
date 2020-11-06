@@ -1,4 +1,4 @@
-import Entity from "./Entity";
+import Entity, { entityProperties } from "./Entity";
 import Id from "./Id";
 import EntityRelationsPair from "./Pair/EntityRelationsPair";
 import Relation from "./Relation";
@@ -8,11 +8,13 @@ export interface IKickDBWrapper {
   updateEntityById(id: Id): Promise<boolean>;
   deleteById(id: Id): Promise<boolean>;
   getEntityById(id: Id): Promise<Entity> | null;
-  getEntitiesByParams(
-    params: Object,
+  getEntitiesByProperties(
+    properties: entityProperties,
     pageNumber: number,
     entitiesPerPage: number
   ): Promise<Array<Entity>> | null;
+
+  getNumberOfPages(properties: entityProperties, entitiesPerPage: number): Promise<number>;
 
   getEntityRelationsById(
     id: Id,

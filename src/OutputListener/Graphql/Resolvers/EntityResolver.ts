@@ -1,37 +1,66 @@
 import "reflect-metadata";
-import { Arg, Args, ArgsType, Field, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Args,
+  ArgsType,
+  Field,
+  FieldResolver,
+  Query,
+  Resolver,
+} from "type-graphql";
 import Entity, { entityProperties } from "../../../Dal/Entity";
 import { dbWrapper } from "../../../bootstrapper";
 import Id from "../../../Dal/Id";
 import { Min } from "class-validator";
 
 @ArgsType()
-class pagingArgs {
-  @Field((type) => Number)
-  @Min(0)
-  entitiesPerPage: number;
-
+class pageNumber {
   @Field((type) => Number)
   @Min(1)
   pageNumber: number;
 }
 
-@Resolver()
+@ArgsType()
+class entitiesPerPage {
+  @Field((type) => Number)
+  @Min(0)
+  entitiesPerPage: number;
+}
+
+@Resolver((of) => Entity)
 export default class EntityResolver {
+  constructor(
+    private _numberOfEntitiesPerPage: number,
+    private _params: entityProperties
+  ) {}
   @Query((returns) => [Entity], {
     nullable: true,
     description: "get all entities matching params",
   })
   async entities(
     @Args() entityProperties: entityProperties,
-    @Args() { entitiesPerPage, pageNumber }: pagingArgs
+    @Args() { pageNumber }: pageNumber,
+    @Args() { entitiesPerPage }: entitiesPerPage
   ): Promise<Entity[]> {
     return Promise.resolve(
-      await dbWrapper.getEntitiesByParams(
+      await dbWrapper.getEntitiesByProperties(
         entityProperties,
         pageNumber,
         entitiesPerPage
       )
+    );
+  }
+
+  @Query((returns) => Number, {
+    nullable: false,
+    description: "get number of pages",
+  })
+  async getPagesNumber(
+    @Args() entityProperties: entityProperties,
+    @Args() { entitiesPerPage }: entitiesPerPage
+  ): Promise<Number> {
+    return Promise.resolve(
+      await dbWrapper.getNumberOfPages(entityProperties, entitiesPerPage)
     );
   }
 

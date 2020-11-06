@@ -173,7 +173,7 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  async getEntitiesByParams(
+  async getEntitiesByProperties(
     properties: entityProperties,
     pageNumber: number,
     entitiesPerPage: number
@@ -182,12 +182,37 @@ export default class Neo4j implements IKickDBWrapper {
     queryString = queryString.concat(
       `match(entities ${JsonToStringWithoutQuotes(
         properties.Params
-      )}) return entities ORDER BY id(entities) SKIP ${entitiesPerPage * (pageNumber-1)} LIMIT ${entitiesPerPage}`
+      )}) return entities ORDER BY id(entities) SKIP ${
+        entitiesPerPage * (pageNumber - 1)
+      } LIMIT ${entitiesPerPage}`
     );
     try {
       let results = await this._session.run(queryString);
       return Promise.resolve(
         results.records.map((record) => this.RecordToEntity(record, "entities"))
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  async getNumberOfPages(
+    properties: entityProperties,
+    entitiesPerPage: number
+  ): Promise<number> {
+    let queryString = "";
+    queryString = queryString.concat(
+      `match(entities ${JsonToStringWithoutQuotes(
+        properties.Params
+      )}) return count(entities)/${entitiesPerPage}`
+    );
+
+    try {
+      let results = await this._session.run(queryString);
+      return Promise.resolve(
+        results.records[0]
+          .get(`count(entities)/${entitiesPerPage}`)
+          .toNumber() + 1
       );
     } catch (err) {
       return Promise.reject(err);
