@@ -5,13 +5,18 @@ import { dbWrapper } from "./bootstrapper";
 import EntityRelationsPair from "./Dal/Pair/EntityRelationsPair";
 import Entity, { entityProperties } from "./Dal/Entity";
 import Relation from "./Dal/Relation";
+import Id from "./Dal/Id";
 
-dbWrapper.createEntity(
-  new EntityRelationsPair(
-    new Entity("Person", new entityProperties({ name: "newName", age: 120 })),
-    [new Relation("randomRelation", "12", null, "12")]
-  )
-).then(res=>console.log(res))
+dbWrapper
+// .createEntity(
+//   new EntityRelationsPair(
+//     new Entity("Person", new entityProperties({ name: "newName", age: 120 })),
+//     [new Relation("randomRelation", "12", null, "12")]
+//   )
+// )
+.deleteById(new Id("13"))
+.then(res=>console.log(res))
 .catch(err=>console.log(err))
+
 
 listener().then((res) => console.log("success"));

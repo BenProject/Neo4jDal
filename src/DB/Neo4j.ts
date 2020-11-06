@@ -4,9 +4,10 @@ import { IKickDBWrapper } from "../Dal/interfaces";
 import { JsonToStringWithoutQuotes } from "../utils";
 import Integer from "neo4j-driver/lib/integer.js";
 import { mapValues } from "lodash";
-import Entity, { entityProperties } from "../Dal/Entity";
+import Entity, { entityProperties} from "../Dal/Entity";
 import Relation from "../Dal/Relation";
 import EntityRelationsPair from "../Dal/Pair/EntityRelationsPair";
+import Id from "../Dal/Id";
 
 export default class Neo4j implements IKickDBWrapper {
   private _driver: Driver;
@@ -61,7 +62,7 @@ export default class Neo4j implements IKickDBWrapper {
     return new Entity(
       recordDetails.labels[0],
       entityProperties,
-      entityId.toString()
+      new Id(entityId.toString())
     );
   }
 
@@ -144,10 +145,10 @@ export default class Neo4j implements IKickDBWrapper {
     throw new Error("Method not implemented.");
   }
 
-  async deleteById(id: string): Promise<boolean> {
+  async deleteById(id: Id): Promise<boolean> {
     let queryString = "";
     queryString = queryString.concat(
-      `MATCH (entity) WHERE toString(id(entity))="${id}" DETACH DELETE entity`
+      `MATCH (entity) WHERE toString(id(entity))="${id.id}" DETACH DELETE entity`
     );
     try {
       await this._session.run(queryString);
@@ -157,10 +158,10 @@ export default class Neo4j implements IKickDBWrapper {
     }
   }
 
-  async getEntityById(id: string): Promise<Entity> {
+  async getEntityById(id: Id): Promise<Entity> {
     let queryString = "";
     queryString = queryString.concat(
-      `MATCH (entity) WHERE toString(id(entity))="${id}" RETURN entity`
+      `MATCH (entity) WHERE toString(id(entity))="${id.id}" RETURN entity`
     );
 
     try {
