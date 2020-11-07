@@ -1,18 +1,17 @@
-const express = require("express");
-const { graphqlHTTP } = require("express-graphql");
+import * as express from "express";
+import { graphqlHTTP } from "express-graphql";
 import { buildSchema } from "type-graphql";
-import Config from "../../../Config";
 import EntityResolver from "./Resolvers/EntityResolver";
 import RelationResolver from "./Resolvers/RelationResolver";
-import * as path from "path";
 
-const app = express();
-export async function listener() {
+const router = express.Router();
+
+export async function createListenerRouter() {
   const schema = await buildSchema({
     resolvers: [EntityResolver, RelationResolver],
   });
 
-  app.use(
+  router.use(
     "/graphql",
     graphqlHTTP({
       schema: schema,
@@ -20,5 +19,5 @@ export async function listener() {
     })
   );
 
-  app.listen(Config.listenerPort);
+  return Promise.resolve(router);
 }
