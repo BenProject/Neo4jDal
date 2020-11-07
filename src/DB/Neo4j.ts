@@ -11,7 +11,6 @@ import Id from "../Dal/Id";
 
 export default class Neo4j implements IKickDBWrapper {
   private _driver: Driver;
-  private _session: Session;
   private _dbAdress: string;
   private _username: string;
   private _password: string;
@@ -25,7 +24,6 @@ export default class Neo4j implements IKickDBWrapper {
 
   private init() {
     this.createConnection();
-    this.createSession();
   }
 
   private createConnection() {
@@ -33,10 +31,6 @@ export default class Neo4j implements IKickDBWrapper {
       this._dbAdress,
       neo4j.auth.basic(this._username, this._password)
     );
-  }
-
-  private createSession() {
-    this._session = this._driver.session();
   }
 
   // neo4j id can not start with number and cannot have dashes
@@ -86,9 +80,8 @@ export default class Neo4j implements IKickDBWrapper {
     });
   }
 
-  async createEntity(
-    entityRelationsPair: EntityRelationsPair
-  ): Promise<boolean> {
+  async createEntity(entityRelationsPair: EntityRelationsPair): Promise<Id> {
+    const session = this._driver.session();
     let queryString = "";
     let relations = entityRelationsPair.Relations;
     let entity = entityRelationsPair.Entity;
@@ -105,8 +98,8 @@ export default class Neo4j implements IKickDBWrapper {
 
     queryString = queryString.concat(
       `MERGE (entity:${entity.EntityType} ${JsonToStringWithoutQuotes(
-        entity.Properties.Params
-      )})`
+        entity.Properties
+      )}) `
     );
 
     tempIdToRelationsMap.map((idToRelation) => {
@@ -117,7 +110,7 @@ export default class Neo4j implements IKickDBWrapper {
         queryString = queryString.concat(
           `MERGE ((entity)-[${this.generateTempNeo4jId()}:${
             idToRelation.relDetails.RelType
-          }]->(${idToRelation.relId}))`
+          }]->(${idToRelation.relId})) `
         );
       if (
         idToRelation.relDetails.StartEntityId ===
@@ -130,14 +123,17 @@ export default class Neo4j implements IKickDBWrapper {
         );
     });
 
+    queryString = queryString.concat(" return entity");
     try {
-      let result = await this._session.run(queryString);
+      let result = await session.run(queryString);
       //   result.records
       return Promise.resolve(
-        result.summary.counters["_stats"].nodesCreated != 0
+        new Id(result.records[0].get("entity").identity.toString())
       );
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 
@@ -146,30 +142,36 @@ export default class Neo4j implements IKickDBWrapper {
   }
 
   async deleteById(id: Id): Promise<boolean> {
+    const session = this._driver.session();
     let queryString = "";
     queryString = queryString.concat(
       `MATCH (entity) WHERE toString(id(entity))="${id.id}" DETACH DELETE entity`
     );
     try {
-      await this._session.run(queryString);
+      await session.run(queryString);
       return Promise.resolve(true);
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 
   async getEntityById(id: Id): Promise<Entity> {
+    const session = this._driver.session();
     let queryString = "";
     queryString = queryString.concat(
       `MATCH (entity) WHERE toString(id(entity))="${id.id}" RETURN entity`
     );
 
     try {
-      let results = await this._session.run(queryString);
+      let results = await session.run(queryString);
       const entity = this.RecordToEntity(results.records[0], "entity");
       return Promise.resolve(entity);
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 
@@ -178,6 +180,7 @@ export default class Neo4j implements IKickDBWrapper {
     pageNumber: number,
     entitiesPerPage: number
   ): Promise<Entity[]> {
+    const session = this._driver.session();
     let queryString = "";
     queryString = queryString.concat(
       `match(entities ${JsonToStringWithoutQuotes(
@@ -187,12 +190,14 @@ export default class Neo4j implements IKickDBWrapper {
       } LIMIT ${entitiesPerPage}`
     );
     try {
-      let results = await this._session.run(queryString);
+      let results = await session.run(queryString);
       return Promise.resolve(
         results.records.map((record) => this.RecordToEntity(record, "entities"))
       );
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 
@@ -200,6 +205,7 @@ export default class Neo4j implements IKickDBWrapper {
     properties: entityProperties,
     entitiesPerPage: number
   ): Promise<number> {
+    const session = this._driver.session();
     let queryString = "";
     queryString = queryString.concat(
       `match(entities ${JsonToStringWithoutQuotes(
@@ -208,7 +214,7 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     try {
-      let results = await this._session.run(queryString);
+      let results = await session.run(queryString);
       return Promise.resolve(
         results.records[0]
           .get(`count(entities)/${entitiesPerPage}`)
@@ -216,6 +222,8 @@ export default class Neo4j implements IKickDBWrapper {
       );
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 
@@ -239,6 +247,7 @@ export default class Neo4j implements IKickDBWrapper {
     hopsNumber: number,
     relationType: string | null
   ): Promise<Array<EntityRelationsPair>> {
+    const session = this._driver.session();
     let queryString = "";
     let relatedEntites = new Array<EntityRelationsPair>();
 
@@ -253,7 +262,7 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     try {
-      let results = await this._session.run(queryString);
+      let results = await session.run(queryString);
       results.records.map((record) =>
         relatedEntites.push(
           this.neo4jRecordToEntityAndEntityRelationsPair(
@@ -267,6 +276,8 @@ export default class Neo4j implements IKickDBWrapper {
       return Promise.resolve(relatedEntites);
     } catch (err) {
       return Promise.reject(err);
+    } finally {
+      session.close();
     }
   }
 

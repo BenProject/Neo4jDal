@@ -1,12 +1,18 @@
 import "reflect-metadata";
-import { createListenerRouter } from "./OutputListener/Graphql";
+import { createOutputRouter } from "./OutputListener/Graphql";
 import Config from "../Config";
 import * as express from "express";
+import { createInputRouter } from "./InputListener/Rest";
+import * as bodyParser from "body-parser";
+
 
 async function run() {
-  const listenerRouter = await createListenerRouter();
+  const outputListener = await createOutputRouter("/output");
+  const inputListener = await createInputRouter("/input");
   const app = express();
-  app.use("", listenerRouter);
+  app.use(bodyParser.json())
+  app.use("", outputListener);
+  app.use("", inputListener);
   app.listen(Config.listenerPort);
 }
 
