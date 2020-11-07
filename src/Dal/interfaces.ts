@@ -11,7 +11,8 @@ export interface IKickDBWrapper {
   getEntitiesByProperties(
     properties: entityProperties,
     pageNumber: number,
-    entitiesPerPage: number
+    entitiesPerPage: number,
+    entityType: string | null
   ): Promise<Array<Entity>> | null;
 
   getNumberOfPages(

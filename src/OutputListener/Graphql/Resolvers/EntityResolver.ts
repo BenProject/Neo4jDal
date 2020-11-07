@@ -27,6 +27,7 @@ class entitiesPerPage {
   entitiesPerPage: number;
 }
 
+
 @Resolver((of) => Entity)
 export default class EntityResolver {
   constructor(
@@ -40,13 +41,15 @@ export default class EntityResolver {
   async entities(
     @Args() entityProperties: entityProperties,
     @Args() { pageNumber }: pageNumber,
-    @Args() { entitiesPerPage }: entitiesPerPage
+    @Args() { entitiesPerPage }: entitiesPerPage,
+    @Arg("entityType", { nullable:true }) entityType: string
   ): Promise<Entity[]> {
     return Promise.resolve(
       await dbWrapper.getEntitiesByProperties(
         entityProperties,
         pageNumber,
-        entitiesPerPage
+        entitiesPerPage,
+        entityType
       )
     );
   }
