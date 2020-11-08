@@ -27,10 +27,8 @@ class entitiesPerPage {
   entitiesPerPage: number;
 }
 
-
 @Resolver((of) => Entity)
 export default class EntityResolver {
- 
   @Query((returns) => [Entity], {
     nullable: true,
     description: "get all entities matching params",
@@ -39,16 +37,20 @@ export default class EntityResolver {
     @Args() entityProperties: entityProperties,
     @Args() { pageNumber }: pageNumber,
     @Args() { entitiesPerPage }: entitiesPerPage,
-    @Arg("entityType", { nullable:true }) entityType: string
+    @Arg("entityType", { nullable: true }) entityType: string
   ): Promise<Entity[]> {
-    return Promise.resolve(
-      await dbWrapper.getEntitiesByProperties(
-        entityProperties,
-        pageNumber,
-        entitiesPerPage,
-        entityType
-      )
-    );
+    try {
+      return Promise.resolve(
+        await dbWrapper.getEntitiesByProperties(
+          entityProperties,
+          pageNumber,
+          entitiesPerPage,
+          entityType
+        )
+      );
+    } catch (err) {
+      return Promise.reject(`error while trying to get entities, err: ${err}`);
+    }
   }
 
   @Query((returns) => Number, {
@@ -59,9 +61,15 @@ export default class EntityResolver {
     @Args() entityProperties: entityProperties,
     @Args() { entitiesPerPage }: entitiesPerPage
   ): Promise<Number> {
-    return Promise.resolve(
-      await dbWrapper.getNumberOfPages(entityProperties, entitiesPerPage)
-    );
+    try {
+      return Promise.resolve(
+        await dbWrapper.getNumberOfPages(entityProperties, entitiesPerPage)
+      );
+    } catch (err) {
+      return Promise.reject(
+        `error while trying to get entities pages count,err: ${err}`
+      );
+    }
   }
 
   @Query((returns) => Entity, {
@@ -69,6 +77,10 @@ export default class EntityResolver {
     description: "get entity by id",
   })
   async entity(@Args() entityId: Id): Promise<Entity> {
-    return Promise.resolve(await dbWrapper.getEntityById(entityId));
+    try {
+      return Promise.resolve(await dbWrapper.getEntityById(entityId));
+    } catch (err) {
+      return Promise.reject(`error while trying to get entity,err: ${err}`);
+    }
   }
 }

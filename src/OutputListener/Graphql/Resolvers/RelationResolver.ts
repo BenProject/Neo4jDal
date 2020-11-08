@@ -34,8 +34,18 @@ export default class RelationResolver {
     @Args() entityId: Id,
     @Args() { hopsNumber, relationType }: relationsArgs
   ): Promise<Array<EntityRelationsPair>> {
-    return Promise.resolve(
-      await dbWrapper.getEntityRelationsById(entityId, hopsNumber, relationType)
-    );
+    try {
+      return Promise.resolve(
+        await dbWrapper.getEntityRelationsById(
+          entityId,
+          hopsNumber,
+          relationType
+        )
+      );
+    } catch (err) {
+      return Promise.reject(
+        `error while trying to get entities relations,err: ${err}`
+      );
+    }
   }
 }
