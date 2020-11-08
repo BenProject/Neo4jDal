@@ -123,9 +123,9 @@ export default class Neo4j implements IKickDBWrapper {
         );
     });
 
-    queryString = queryString.concat(" return entity");
+    queryString = queryString.concat(" RETURN entity");
     try {
-      let result = await session.run(queryString);
+      const result = await session.run(queryString);
       return Promise.resolve(
         new Id(result.records[0].get("entity").identity.toString())
       );
