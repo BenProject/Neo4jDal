@@ -11,8 +11,6 @@ export class entityProperties {
   }
 }
 
-
-
 @ObjectType()
 export default class Entity {
   @Field((type) => String)
