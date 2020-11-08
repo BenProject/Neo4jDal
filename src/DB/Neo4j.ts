@@ -83,8 +83,8 @@ export default class Neo4j implements IKickDBWrapper {
   async createEntity(entityRelationsPair: EntityRelationsPair): Promise<Id> {
     const session = this._driver.session();
     let queryString = "";
-    let relations = entityRelationsPair.Relations;
-    let entity = entityRelationsPair.Entity;
+    const relations = entityRelationsPair.Relations;
+    const entity = entityRelationsPair.Entity;
 
     let tempIdToRelationsMap = relations.map((relation) => {
       return { relId: this.generateTempNeo4jId(), relDetails: relation };
