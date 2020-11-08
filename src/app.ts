@@ -7,12 +7,12 @@ import * as bodyParser from "body-parser";
 
 
 async function run() {
-  const outputListener = await createOutputRouter("/output");
-  const inputListener = await createInputRouter("/input");
+  const outputListener = await createOutputRouter();
+  const inputListener = await createInputRouter();
   const app = express();
   app.use(bodyParser.json())
-  app.use("", outputListener);
-  app.use("", inputListener);
+  app.use("/output", outputListener);
+  app.use("/input", inputListener);
   app.listen(Config.listenerPort);
 }
 

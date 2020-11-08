@@ -3,8 +3,8 @@ import * as express from "express";
 
 const router = express.Router();
 
-export async function createInputRouter(rootPath: string) {
-  router.use(`${rootPath}/entity`, EntityRouter);
+export async function createInputRouter() {
+  router.use(`/entity`, EntityRouter);
 
   return Promise.resolve(router);
 }

@@ -6,13 +6,13 @@ import RelationResolver from "./Resolvers/RelationResolver";
 
 const router = express.Router();
 
-export async function createOutputRouter(rootPath: string) {
+export async function createOutputRouter() {
   const schema = await buildSchema({
     resolvers: [EntityResolver, RelationResolver],
   });
 
   router.use(
-    rootPath,
+    "",
     graphqlHTTP({
       schema: schema,
       graphiql: true,
