@@ -192,7 +192,7 @@ export default class Neo4j implements IKickDBWrapper {
       } LIMIT ${entitiesPerPage}`
     );
     try {
-      let results = await session.run(queryString);
+      const results = await session.run(queryString);
       return Promise.resolve(
         results.records.map((record) => this.RecordToEntity(record, "entities"))
       );
@@ -216,7 +216,7 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     try {
-      let results = await session.run(queryString);
+      const results = await session.run(queryString);
       return Promise.resolve(
         results.records[0]
           .get(`count(entities)/${entitiesPerPage}`)
@@ -264,7 +264,7 @@ export default class Neo4j implements IKickDBWrapper {
     );
 
     try {
-      let results = await session.run(queryString);
+      const results = await session.run(queryString);
       results.records.map((record) =>
         relatedEntites.push(
           this.neo4jRecordToEntityAndEntityRelationsPair(
