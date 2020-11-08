@@ -12,7 +12,7 @@ export async function createOutputRouter() {
   });
 
   router.use(
-    "",
+    "/",
     graphqlHTTP({
       schema: schema,
       graphiql: true,
