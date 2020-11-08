@@ -92,7 +92,7 @@ export default class Neo4j implements IKickDBWrapper {
 
     tempIdToRelationsMap.map((idToRelation) => {
       queryString = queryString.concat(
-        ` MATCH(${idToRelation.relId}) where toString(id(${idToRelation.relId}))="${idToRelation.relDetails.RelEntityId}"`
+        ` MATCH(${idToRelation.relId}) WHERE toString(id(${idToRelation.relId}))="${idToRelation.relDetails.RelEntityId}"`
       );
     });
 
@@ -126,7 +126,6 @@ export default class Neo4j implements IKickDBWrapper {
     queryString = queryString.concat(" return entity");
     try {
       let result = await session.run(queryString);
-      //   result.records
       return Promise.resolve(
         new Id(result.records[0].get("entity").identity.toString())
       );
