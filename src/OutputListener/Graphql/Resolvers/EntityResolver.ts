@@ -30,10 +30,7 @@ class entitiesPerPage {
 
 @Resolver((of) => Entity)
 export default class EntityResolver {
-  constructor(
-    private _numberOfEntitiesPerPage: number,
-    private _params: entityProperties
-  ) {}
+ 
   @Query((returns) => [Entity], {
     nullable: true,
     description: "get all entities matching params",
